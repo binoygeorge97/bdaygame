@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-950 text-green-400 font-mono m-0 min-h-screen;
+  }
+}
+
+.glow-text {
+  text-shadow: 0 0 5px rgba(74, 222, 128, 0.5), 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+.fog-transition {
+  transition: background-color 0.4s ease, opacity 0.4s ease;
+}
