@@ -2,34 +2,44 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MAZE_WIDTH = 15;
-const MAZE_HEIGHT = 15;
+const MAZE_WIDTH = 25;
+const MAZE_HEIGHT = 25;
 
-// Winding maze with 3 barriers gating progression:
-//   Barrier 1 (N1/D1) at row 5 → gates lower half (Coffee + path to Barrier 2)
-//   Barrier 2 (N2/D2) at row 10 → gates row 11 corridor (path to Barrier 3)
-//   Barrier 3 (D3/N3) at row 11 → gates Brain loot
+// 25x25 winding maze with 5 barriers gating progression:
+//   P(1,1) → wind top-left → N1/D1(row 7) → Coffee(16,5) + path continues
+//   → wind mid → N2/D2(row 11) → wind → N3/D3(row 15-16)
+//   → wind bottom → N4/D4(row 19) → wind → N5/D5(row 21) → Brain(1,23)
 const INITIAL_MAP = [
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','S','0','0','1','0','0','0','0','0','1','0','0','1','1'],
-  ['1','1','1','0','1','0','1','1','1','0','1','0','1','1','1'],
-  ['1','0','1','0','0','0','1','0','1','0','1','0','1','0','1'],
-  ['1','0','1','1','1','1','1','0','1','0','1','1','1','0','1'],
-  ['1','0','0','0','0','1','1','N1','D1','0','1','0','0','0','1'],
-  ['1','1','1','1','1','1','1','0','1','1','1','1','1','1','1'],
-  ['1','0','0','1','0','1','1','0','1','0','0','0','1','C','1'],
-  ['1','0','1','1','0','1','1','0','1','0','1','0','1','0','1'],
-  ['1','0','0','0','0','0','0','0','0','0','1','0','0','0','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','N2','D2'],
-  ['1','D3','N3','0','0','0','0','0','0','0','0','0','0','0','1'],
-  ['1','B','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','0','0','0','0','0','0','0','0','0','0','0','0','0','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','S','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','0','0','0','0','0','0','1','0','1','1','1','1','1','1','1','C','1','1','1','1','1','1','1','1'],
+  ['1','0','1','1','1','1','0','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1'],
+  ['1','0','1','1','1','1','0','0','0','0','0','N1','D1','0','0','0','0','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1'],
+  ['1','1','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1'],
+  ['1','1','1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','0','0','0','0','0','0','0','N2','D2','0','0','0','0','0','0','0','0','0','1','1','1','1'],
+  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1'],
+  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','0','0','0','0','0','0','0','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','0','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','N3','1','1','1','1','1','0','1','1','1','1'],
+  ['1','1','1','1','1','1','1','1','0','1','1','1','1','1','D3','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','0','0','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','1','1','1','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','N4','D4','0','0','0','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
+  ['1','1','1','0','0','0','0','0','0','D5','N5','0','0','0','0','0','0','0','0','0','0','0','0','0','1'],
+  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
+  ['1','B','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
 ];
 
-// Mixed flora for wall tiles — weighted toward trees
-const FLORA_EMOJIS = ['🌲', '🌿', '🌱', '🌲', '🌲', '🌿'];
-const getFlora = (x, y) => FLORA_EMOJIS[(x * 7 + y * 13 + x * y) % FLORA_EMOJIS.length];
+// Mixed flora for wall tiles — varied forest texture
+const FLORA_EMOJIS = ['🌲', '🌿', '🌱', '🌲', '🌲', '🌿', '🌱', '🌲'];
+const getFlora = (x, y) => FLORA_EMOJIS[(x * 7 + y * 13 + x * y * 3) % FLORA_EMOJIS.length];
 
 const TRIVIA = {
   N1: {
@@ -61,6 +71,26 @@ const TRIVIA = {
     ],
     answer: 0,
     doorToUnlock: 'D3'
+  },
+  N4: {
+    question: "Challenge: What is the critical challenge of determining whether Robot A's observed landmark is the same landmark seen by Robot B, enabling their maps to merge?",
+    options: [
+      "A) Inter-robot Data Association",
+      "B) Cross-platform Sensor Fusion",
+      "C) Temporal Map Synchronization"
+    ],
+    answer: 0,
+    doorToUnlock: 'D4'
+  },
+  N5: {
+    question: "Challenge: What is the primary global effect of establishing numerous, correct inter-robot loop closures in multi-SLAM?",
+    options: [
+      "A) Significantly reduced cumulative drift and improved overall consistency",
+      "B) Increased computational load per agent",
+      "C) Reduced communication frequency between robots"
+    ],
+    answer: 0,
+    doorToUnlock: 'D5'
   }
 };
 
@@ -69,7 +99,7 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    imgUrl: "https://via.placeholder.com/400x250/166534/22c55e?text=STARBUCKS+GIFT+CARD" // placeholder
+    imgUrl: "https://via.placeholder.com/400x250/166534/22c55e?text=STARBUCKS+GIFT+CARD"
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
@@ -79,16 +109,32 @@ const LOOTS = {
   }
 };
 
+// Scenery animals — start on wall tiles, wander through flora
+const INITIAL_ANIMALS = [
+  { x: 2, y: 2, emoji: '🐛' },
+  { x: 12, y: 4, emoji: '🦋' },
+  { x: 8, y: 14, emoji: '🦊' },
+  { x: 18, y: 18, emoji: '🐇' },
+  { x: 22, y: 6, emoji: '🕷️' },
+];
+
 export default function App() {
   const [pos, setPos] = useState({ x: 1, y: 1 });
   const [discovered, setDiscovered] = useState(new Set());
-  const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false });
+  const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false, D4: false, D5: false });
   const [lootsCollected, setLootsCollected] = useState({ C: false, B: false });
   const [activeModal, setActiveModal] = useState(null);
+  const [animalPositions, setAnimalPositions] = useState(INITIAL_ANIMALS);
 
-  // Scenery animals — start on wall tiles
-  const [animal1Pos, setAnimal1Pos] = useState({ x: 6, y: 2 });
-  const [animal2Pos, setAnimal2Pos] = useState({ x: 10, y: 8 });
+  // Full game reset
+  const resetGame = () => {
+    setPos({ x: 1, y: 1 });
+    setDiscovered(new Set());
+    setDoorsState({ D1: false, D2: false, D3: false, D4: false, D5: false });
+    setLootsCollected({ C: false, B: false });
+    setActiveModal(null);
+    setAnimalPositions(INITIAL_ANIMALS);
+  };
 
   // Initialize discovery
   useEffect(() => {
@@ -101,7 +147,7 @@ export default function App() {
       for (let dx = -3; dx <= 3; dx++) {
         const nx = x + dx;
         const ny = y + dy;
-        // Circular radius of 3 (dx^2 + dy^2 <= 9)
+        // Circular radius of 3 (dx^2 + dy^2 <= 10)
         if (dx * dx + dy * dy <= 10) {
           if (nx >= 0 && nx < MAZE_WIDTH && ny >= 0 && ny < MAZE_HEIGHT) {
             newDisc.add(`${nx},${ny}`);
@@ -112,9 +158,9 @@ export default function App() {
     setDiscovered(newDisc);
   };
 
-  // Animal movement — wander to adjacent wall tiles every 5 seconds
+  // Animal movement — one random animal moves every 5 seconds
   useEffect(() => {
-    const moveAnimal = (currentPos) => {
+    const moveAnimal = (animalPos) => {
       const directions = [
         { dx: 0, dy: -1 },
         { dx: 0, dy: 1 },
@@ -123,20 +169,24 @@ export default function App() {
       ];
       const shuffled = [...directions].sort(() => Math.random() - 0.5);
       for (const { dx, dy } of shuffled) {
-        const nx = currentPos.x + dx;
-        const ny = currentPos.y + dy;
+        const nx = animalPos.x + dx;
+        const ny = animalPos.y + dy;
         if (nx >= 0 && nx < MAZE_WIDTH && ny >= 0 && ny < MAZE_HEIGHT) {
           if (INITIAL_MAP[ny][nx] === '1') {
-            return { x: nx, y: ny };
+            return { ...animalPos, x: nx, y: ny };
           }
         }
       }
-      return currentPos; // no valid adjacent wall tile
+      return animalPos;
     };
 
     const interval = setInterval(() => {
-      setAnimal1Pos(prev => moveAnimal(prev));
-      setAnimal2Pos(prev => moveAnimal(prev));
+      setAnimalPositions(prev => {
+        const idx = Math.floor(Math.random() * prev.length);
+        const updated = [...prev];
+        updated[idx] = moveAnimal(updated[idx]);
+        return updated;
+      });
     }, 5000);
 
     return () => clearInterval(interval);
@@ -159,7 +209,7 @@ export default function App() {
         if (cell === '1') return; // Wall
         
         // Handle doors
-        if (['D1', 'D2', 'D3'].includes(cell)) {
+        if (['D1', 'D2', 'D3', 'D4', 'D5'].includes(cell)) {
           if (!doorsState[cell]) {
             const nodeId = Object.keys(TRIVIA).find(k => TRIVIA[k].doorToUnlock === cell);
             if (nodeId) setActiveModal({ type: 'trivia', nodeId });
@@ -168,7 +218,7 @@ export default function App() {
         }
 
         // Handle nodes
-        if (['N1', 'N2', 'N3'].includes(cell)) {
+        if (['N1', 'N2', 'N3', 'N4', 'N5'].includes(cell)) {
           const doorId = TRIVIA[cell].doorToUnlock;
           if (!doorsState[doorId]) {
             setActiveModal({ type: 'trivia', nodeId: cell });
@@ -209,13 +259,14 @@ export default function App() {
   };
 
   const isLootActive = activeModal?.type === 'loot';
+  const isBrainClaimed = activeModal?.type === 'loot' && activeModal?.lootId === 'B' && activeModal?.claimed;
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 select-none" style={{ backgroundColor: '#9bbc0f', fontFamily: "'Press Start 2P', monospace" }}>
       {isLootActive && <Confetti width={window.innerWidth} height={window.innerHeight} />}
       
       <div className="flex flex-col items-center">
-        <h1 className="text-lg mb-6 text-center leading-relaxed" style={{ color: '#0f380f' }}>
+        <h1 className="mb-4 text-center leading-relaxed" style={{ color: '#0f380f', fontSize: '14px' }}>
           JESSI's POKEMON<br/>SLAM ADVENTURE
         </h1>
 
@@ -225,8 +276,7 @@ export default function App() {
               {row.map((cell, x) => {
                 const isDiscovered = discovered.has(`${x},${y}`);
                 const isRobotHere = pos.x === x && pos.y === y;
-                const isAnimal1Here = animal1Pos.x === x && animal1Pos.y === y;
-                const isAnimal2Here = animal2Pos.x === x && animal2Pos.y === y;
+                const animal = animalPositions.find(a => a.x === x && a.y === y);
                 
                 let renderContent = '';
                 let bgColor = '#8bac0f'; // path green
@@ -238,16 +288,14 @@ export default function App() {
                   renderContent = '🚶‍♀️';
                 } else if (cell === '1') {
                   bgColor = '#306230';
-                  if (isAnimal1Here) {
-                    renderContent = '🐛';
-                  } else if (isAnimal2Here) {
-                    renderContent = '🦋';
+                  if (animal) {
+                    renderContent = animal.emoji;
                   } else {
                     renderContent = getFlora(x, y);
                   }
-                } else if (['D1', 'D2', 'D3'].includes(cell)) {
+                } else if (['D1', 'D2', 'D3', 'D4', 'D5'].includes(cell)) {
                   renderContent = doorsState[cell] ? '' : '🛑';
-                } else if (['N1', 'N2', 'N3'].includes(cell)) {
+                } else if (['N1', 'N2', 'N3', 'N4', 'N5'].includes(cell)) {
                   renderContent = doorsState[TRIVIA[cell].doorToUnlock] ? '' : '💻';
                 } else if (cell === 'C') {
                   renderContent = lootsCollected['C'] ? '' : '☕';
@@ -260,8 +308,8 @@ export default function App() {
                 return (
                   <div
                     key={`${x}-${y}`}
-                    className="w-8 h-8 flex items-center justify-center text-base fog-transition"
-                    style={{ backgroundColor: bgColor }}
+                    className="flex items-center justify-center fog-transition"
+                    style={{ backgroundColor: bgColor, width: '26px', height: '26px', fontSize: '14px' }}
                   >
                     {renderContent}
                   </div>
@@ -271,8 +319,8 @@ export default function App() {
           ))}
         </div>
 
-        <p className="mt-4 text-xs text-center leading-relaxed" style={{ color: '#306230' }}>
-           Use Arrow Keys or WASD.<br/>Find 💻 to unlock barriers 🛑.
+        <p className="mt-3 text-center leading-relaxed" style={{ color: '#306230', fontSize: '8px' }}>
+           Use Arrow Keys or WASD. Find 💻 to unlock barriers 🛑.
         </p>
       </div>
 
@@ -323,7 +371,7 @@ export default function App() {
             className="fixed inset-0 z-50 flex items-end justify-center p-4 pb-8"
             style={{ backgroundColor: 'rgba(15, 56, 15, 0.5)' }}
           >
-            <div className="poke-dialog max-w-md w-full text-center">
+            <div className="poke-dialog max-w-md w-full text-center" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
               <h2 className="text-sm mb-4 whitespace-pre-line leading-loose" style={{ color: '#0f380f' }}>
                 {LOOTS[activeModal.lootId].title}
               </h2>
@@ -334,15 +382,25 @@ export default function App() {
               {activeModal.claimed ? (
                 <div className="mb-6">
                   {LOOTS[activeModal.lootId].type === 'claude' ? (
-                    <div className="p-4 rounded flex flex-col gap-3" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
-                      <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{LOOTS[activeModal.lootId].url}</span>
-                      <button 
-                        onClick={() => navigator.clipboard.writeText(LOOTS[activeModal.lootId].url)}
-                        className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
-                        style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
-                      >
-                        ▶ Copy URL
-                      </button>
+                    <div>
+                      <div className="p-4 rounded flex flex-col gap-3 mb-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
+                        <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{LOOTS[activeModal.lootId].url}</span>
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(LOOTS[activeModal.lootId].url)}
+                          className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
+                          style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
+                        >
+                          ▶ Copy URL
+                        </button>
+                      </div>
+                      <div className="p-4 rounded mb-2" style={{ backgroundColor: '#0f380f', border: '2px solid #306230' }}>
+                        <p className="leading-loose" style={{ color: '#9bbc0f', fontSize: '13px' }}>
+                          🎉 CONGRATULATIONS, Jessi! 🎉
+                        </p>
+                        <p className="leading-loose mt-2" style={{ color: '#8bac0f', fontSize: '10px' }}>
+                          Adventure Complete. Game Over!
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <div className="p-4 rounded flex flex-col items-center gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
@@ -368,13 +426,23 @@ export default function App() {
                 </button>
               )}
 
-              <button
-                onClick={() => setActiveModal(null)}
-                className="underline text-xs cursor-pointer"
-                style={{ color: '#306230' }}
-              >
-                ▶ Continue...
-              </button>
+              {isBrainClaimed ? (
+                <button
+                  onClick={resetGame}
+                  className="text-xs cursor-pointer py-2 px-6 rounded"
+                  style={{ backgroundColor: '#0f380f', color: '#9bbc0f', border: '2px solid #306230' }}
+                >
+                  [ Reset Protocol ]
+                </button>
+              ) : (
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="underline text-xs cursor-pointer"
+                  style={{ color: '#306230' }}
+                >
+                  ▶ Continue...
+                </button>
+              )}
             </div>
           </motion.div>
         )}
