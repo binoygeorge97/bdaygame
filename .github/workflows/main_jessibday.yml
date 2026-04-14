@@ -84,3 +84,4 @@ jobs:
           app-name: 'jessibday'
           slot-name: 'Production'
           package: .
+          clean: true
