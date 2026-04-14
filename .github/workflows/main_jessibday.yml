@@ -28,29 +28,6 @@ jobs:
           npm install
           npm run build
 
-      - name: Generate web.config for SPA routing
-        run: |
-          cat > dist/web.config << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <configuration>
-            <system.webServer>
-              <rewrite>
-                <rules>
-                  <rule name="SPA" stopProcessing="true">
-                    <match url=".*" />
-                    <conditions logicalGrouping="MatchAll">
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="/index.html" />
-                  </rule>
-                </rules>
-              </rewrite>
-            </system.webServer>
-          </configuration>
-          EOF
-
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:

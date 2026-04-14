@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+import CryptoJS from 'crypto-js';
 
 const MAZE_WIDTH = 25;
 const MAZE_HEIGHT = 25;
@@ -99,13 +100,13 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    imgUrl: "https://via.placeholder.com/400x250/166534/22c55e?text=STARBUCKS+GIFT+CARD"
+    encImgUrl: "U2FsdGVkX1+BghWTuZQb+/WDfqQiO8rcj6rPe3C/IYeyud+aDLNt9CK86IYLmLqyVuRdPG8jsbgO5Qi+MVMG+aBOqm4YBnzjcl7dwEBR3kp7WqRHiVQtSq6/QWsQiRCy"
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
     message: "The birthday girl has unlocked an Advanced Neural Co-Processor. Here is your Claude Subscription:",
     type: "claude",
-    url: "https://gift.claude.ai/claim_jessi_bd"
+    encUrl: "U2FsdGVkX19ti1Pj/Rh37f62+W+fv3Ctcetx7JU0TvUfh3vfXAjKTKaYTmmcisOytNHVGqADQD1FPbFmkoCZPg=="
   }
 };
 
@@ -122,12 +123,24 @@ export default function App() {
   const [gamePhase, setGamePhase] = useState('locked'); // 'locked' | 'playing' | 'finished'
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
+  const [decryptKey, setDecryptKey] = useState(null); // stores verified password for decryption
   const [pos, setPos] = useState({ x: 1, y: 1 });
   const [discovered, setDiscovered] = useState(new Set());
   const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false, D4: false, D5: false });
   const [lootsCollected, setLootsCollected] = useState({ C: false, B: false });
   const [activeModal, setActiveModal] = useState(null);
   const [animalPositions, setAnimalPositions] = useState(INITIAL_ANIMALS);
+
+  // Decrypt a CryptoJS AES string with the stored key
+  const decryptUrl = (encryptedStr) => {
+    try {
+      const bytes = CryptoJS.AES.decrypt(encryptedStr, decryptKey);
+      const result = bytes.toString(CryptoJS.enc.Utf8);
+      return result || 'ERR: CORRUPTED DATA';
+    } catch {
+      return 'ERR: CORRUPTED DATA';
+    }
+  };
 
   // Full game reset
   const resetGame = () => {
@@ -140,12 +153,14 @@ export default function App() {
     setGamePhase('locked');
     setPassword('');
     setPasswordError(false);
+    setDecryptKey(null);
   };
 
-  // Password check
+  // Password check — store the password as the decryption key
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     if (password.toUpperCase() === 'COFFEEGIRL') {
+      setDecryptKey(password.toUpperCase());
       setGamePhase('playing');
       setPasswordError(false);
     } else {
@@ -398,40 +413,46 @@ export default function App() {
               
               {activeModal.claimed ? (
                 <div className="mb-6">
-                  {LOOTS[activeModal.lootId].type === 'claude' ? (
-                    <div>
-                      <div className="p-4 rounded flex flex-col gap-3 mb-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
-                        <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{LOOTS[activeModal.lootId].url}</span>
-                        <button 
-                          onClick={() => navigator.clipboard.writeText(LOOTS[activeModal.lootId].url)}
-                          className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
+                  {LOOTS[activeModal.lootId].type === 'claude' ? (() => {
+                    const realUrl = decryptUrl(LOOTS[activeModal.lootId].encUrl);
+                    return (
+                      <div>
+                        <div className="p-4 rounded flex flex-col gap-3 mb-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
+                          <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realUrl}</span>
+                          <button 
+                            onClick={() => navigator.clipboard.writeText(realUrl)}
+                            className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
+                            style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
+                          >
+                            ▶ Copy URL
+                          </button>
+                        </div>
+                        <div className="p-4 rounded mb-2" style={{ backgroundColor: '#0f380f', border: '2px solid #306230' }}>
+                          <p className="leading-loose" style={{ color: '#9bbc0f', fontSize: '13px' }}>
+                            🎉 CONGRATULATIONS, Jessi! 🎉
+                          </p>
+                          <p className="leading-loose mt-2" style={{ color: '#8bac0f', fontSize: '10px' }}>
+                            Adventure Complete. Game Over!
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })() : (() => {
+                    const realImgUrl = decryptUrl(LOOTS[activeModal.lootId].encImgUrl);
+                    return (
+                      <div className="p-4 rounded flex flex-col items-center gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
+                        <img src={realImgUrl} alt="Starbucks Gift Card" className="rounded max-w-full" style={{ border: '2px solid #0f380f' }} />
+                        <a 
+                          href={realImgUrl} 
+                          download="Starbucks_Gift_Card.png"
+                          className="py-2 px-6 rounded text-xs inline-block w-full text-center cursor-pointer"
                           style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
                         >
-                          ▶ Copy URL
-                        </button>
+                          ▶ Download Card
+                        </a>
                       </div>
-                      <div className="p-4 rounded mb-2" style={{ backgroundColor: '#0f380f', border: '2px solid #306230' }}>
-                        <p className="leading-loose" style={{ color: '#9bbc0f', fontSize: '13px' }}>
-                          🎉 CONGRATULATIONS, Jessi! 🎉
-                        </p>
-                        <p className="leading-loose mt-2" style={{ color: '#8bac0f', fontSize: '10px' }}>
-                          Adventure Complete. Game Over!
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded flex flex-col items-center gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
-                      <img src={LOOTS[activeModal.lootId].imgUrl} alt="Starbucks Gift Card" className="rounded max-w-full" style={{ border: '2px solid #0f380f' }} />
-                      <a 
-                        href={LOOTS[activeModal.lootId].imgUrl} 
-                        download="Starbucks_Gift_Card.png"
-                        className="py-2 px-6 rounded text-xs inline-block w-full text-center cursor-pointer"
-                        style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
-                      >
-                        ▶ Download Card
-                      </a>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               ) : (
                 <button
