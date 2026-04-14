@@ -5,23 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 const MAZE_WIDTH = 15;
 const MAZE_HEIGHT = 15;
 
+// Winding maze with 3 barriers gating progression:
+//   Barrier 1 (N1/D1) at row 5 → gates lower half (Coffee + path to Barrier 2)
+//   Barrier 2 (N2/D2) at row 10 → gates row 11 corridor (path to Barrier 3)
+//   Barrier 3 (D3/N3) at row 11 → gates Brain loot
 const INITIAL_MAP = [
-  ['S', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', 'C', 'D3','N3','0', '0', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', 'B', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '0', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', 'N2','D2','0', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '0', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', 'N1','D1','0', '0', '0', '0', '0', '0', '1', '1', '1', '1'], 
-  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1']
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','S','0','0','1','0','0','0','0','0','1','0','0','1','1'],
+  ['1','1','1','0','1','0','1','1','1','0','1','0','1','1','1'],
+  ['1','0','1','0','0','0','1','0','1','0','1','0','1','0','1'],
+  ['1','0','1','1','1','1','1','0','1','0','1','1','1','0','1'],
+  ['1','0','0','0','0','1','1','N1','D1','0','1','0','0','0','1'],
+  ['1','1','1','1','1','1','1','0','1','1','1','1','1','1','1'],
+  ['1','0','0','1','0','1','1','0','1','0','0','0','1','C','1'],
+  ['1','0','1','1','0','1','1','0','1','0','1','0','1','0','1'],
+  ['1','0','0','0','0','0','0','0','0','0','1','0','0','0','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','N2','D2'],
+  ['1','D3','N3','0','0','0','0','0','0','0','0','0','0','0','1'],
+  ['1','B','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1','0','0','0','0','0','0','0','0','0','0','0','0','0','1'],
+  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
 ];
+
+// Mixed flora for wall tiles — weighted toward trees
+const FLORA_EMOJIS = ['🌲', '🌿', '🌱', '🌲', '🌲', '🌿'];
+const getFlora = (x, y) => FLORA_EMOJIS[(x * 7 + y * 13 + x * y) % FLORA_EMOJIS.length];
 
 const TRIVIA = {
   N1: {
@@ -72,11 +80,15 @@ const LOOTS = {
 };
 
 export default function App() {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [pos, setPos] = useState({ x: 1, y: 1 });
   const [discovered, setDiscovered] = useState(new Set());
-  const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false }); // false = locked, true = unlocked
+  const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false });
   const [lootsCollected, setLootsCollected] = useState({ C: false, B: false });
-  const [activeModal, setActiveModal] = useState(null); // { type: 'trivia', nodeId: 'N1' } | { type: 'loot', lootId: 'C' }
+  const [activeModal, setActiveModal] = useState(null);
+
+  // Scenery animals — start on wall tiles
+  const [animal1Pos, setAnimal1Pos] = useState({ x: 6, y: 2 });
+  const [animal2Pos, setAnimal2Pos] = useState({ x: 10, y: 8 });
 
   // Initialize discovery
   useEffect(() => {
@@ -99,6 +111,36 @@ export default function App() {
     }
     setDiscovered(newDisc);
   };
+
+  // Animal movement — wander to adjacent wall tiles every 5 seconds
+  useEffect(() => {
+    const moveAnimal = (currentPos) => {
+      const directions = [
+        { dx: 0, dy: -1 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: 0 },
+        { dx: 1, dy: 0 },
+      ];
+      const shuffled = [...directions].sort(() => Math.random() - 0.5);
+      for (const { dx, dy } of shuffled) {
+        const nx = currentPos.x + dx;
+        const ny = currentPos.y + dy;
+        if (nx >= 0 && nx < MAZE_WIDTH && ny >= 0 && ny < MAZE_HEIGHT) {
+          if (INITIAL_MAP[ny][nx] === '1') {
+            return { x: nx, y: ny };
+          }
+        }
+      }
+      return currentPos; // no valid adjacent wall tile
+    };
+
+    const interval = setInterval(() => {
+      setAnimal1Pos(prev => moveAnimal(prev));
+      setAnimal2Pos(prev => moveAnimal(prev));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -183,6 +225,8 @@ export default function App() {
               {row.map((cell, x) => {
                 const isDiscovered = discovered.has(`${x},${y}`);
                 const isRobotHere = pos.x === x && pos.y === y;
+                const isAnimal1Here = animal1Pos.x === x && animal1Pos.y === y;
+                const isAnimal2Here = animal2Pos.x === x && animal2Pos.y === y;
                 
                 let renderContent = '';
                 let bgColor = '#8bac0f'; // path green
@@ -193,8 +237,14 @@ export default function App() {
                 } else if (isRobotHere) {
                   renderContent = '🚶‍♀️';
                 } else if (cell === '1') {
-                  renderContent = '🌳';
                   bgColor = '#306230';
+                  if (isAnimal1Here) {
+                    renderContent = '🐛';
+                  } else if (isAnimal2Here) {
+                    renderContent = '🦋';
+                  } else {
+                    renderContent = getFlora(x, y);
+                  }
                 } else if (['D1', 'D2', 'D3'].includes(cell)) {
                   renderContent = doorsState[cell] ? '' : '🛑';
                 } else if (['N1', 'N2', 'N3'].includes(cell)) {
@@ -203,8 +253,6 @@ export default function App() {
                   renderContent = lootsCollected['C'] ? '' : '☕';
                 } else if (cell === 'B') {
                   renderContent = lootsCollected['B'] ? '' : '🧠';
-                } else if (cell === 'S') {
-                  renderContent = '';
                 } else {
                   renderContent = '';
                 }
