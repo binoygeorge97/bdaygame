@@ -119,6 +119,9 @@ const INITIAL_ANIMALS = [
 ];
 
 export default function App() {
+  const [gamePhase, setGamePhase] = useState('locked'); // 'locked' | 'playing' | 'finished'
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
   const [pos, setPos] = useState({ x: 1, y: 1 });
   const [discovered, setDiscovered] = useState(new Set());
   const [doorsState, setDoorsState] = useState({ D1: false, D2: false, D3: false, D4: false, D5: false });
@@ -134,6 +137,20 @@ export default function App() {
     setLootsCollected({ C: false, B: false });
     setActiveModal(null);
     setAnimalPositions(INITIAL_ANIMALS);
+    setGamePhase('locked');
+    setPassword('');
+    setPasswordError(false);
+  };
+
+  // Password check
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (password.toUpperCase() === 'COFFEEGIRL') {
+      setGamePhase('playing');
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
+    }
   };
 
   // Initialize discovery
@@ -261,7 +278,7 @@ export default function App() {
   const isLootActive = activeModal?.type === 'loot';
   const isBrainClaimed = activeModal?.type === 'loot' && activeModal?.lootId === 'B' && activeModal?.claimed;
 
-  return (
+  const gameScreen = (
     <div className="flex items-center justify-center min-h-screen p-4 select-none" style={{ backgroundColor: '#9bbc0f', fontFamily: "'Press Start 2P', monospace" }}>
       {isLootActive && <Confetti width={window.innerWidth} height={window.innerHeight} />}
       
@@ -428,11 +445,11 @@ export default function App() {
 
               {isBrainClaimed ? (
                 <button
-                  onClick={resetGame}
+                  onClick={() => setGamePhase('finished')}
                   className="text-xs cursor-pointer py-2 px-6 rounded"
                   style={{ backgroundColor: '#0f380f', color: '#9bbc0f', border: '2px solid #306230' }}
                 >
-                  [ Reset Protocol ]
+                  ▶ Complete Adventure
                 </button>
               ) : (
                 <button
@@ -449,4 +466,122 @@ export default function App() {
       </AnimatePresence>
     </div>
   );
+
+  // ─── LOCK SCREEN ────────────────────────────────────────────
+  if (gamePhase === 'locked') {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4 select-none" style={{ backgroundColor: '#0f380f', fontFamily: "'Press Start 2P', monospace" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center gap-8"
+        >
+          <div className="text-center">
+            <p style={{ color: '#306230', fontSize: '12px' }} className="mb-2">🔒 SYSTEM LOCKED 🔒</p>
+            <h1 style={{ color: '#9bbc0f', fontSize: '16px', lineHeight: '2' }}>JESSI's POKEMON<br/>SLAM ADVENTURE</h1>
+            <p style={{ color: '#8bac0f', fontSize: '9px', lineHeight: '2' }} className="mt-4">Enter the access code to begin your quest.</p>
+          </div>
+          <form onSubmit={handlePasswordSubmit} className="flex flex-col items-center gap-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
+              placeholder="ACCESS CODE"
+              autoFocus
+              className="text-center text-xs px-4 py-3 rounded outline-none"
+              style={{
+                backgroundColor: '#306230',
+                color: '#9bbc0f',
+                border: passwordError ? '3px solid #ff6b6b' : '3px solid #8bac0f',
+                fontFamily: "'Press Start 2P', monospace",
+                width: '260px',
+                letterSpacing: '3px',
+              }}
+            />
+            {passwordError && (
+              <motion.p
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ color: '#ff6b6b', fontSize: '8px' }}
+              >
+                ✕ INCORRECT CODE. TRY AGAIN.
+              </motion.p>
+            )}
+            <button
+              type="submit"
+              className="text-xs cursor-pointer py-3 px-8 rounded transition-colors"
+              style={{ backgroundColor: '#8bac0f', color: '#0f380f', border: '3px solid #9bbc0f' }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#9bbc0f'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#8bac0f'; }}
+            >
+              ▶ ENTER
+            </button>
+          </form>
+          <div className="flex gap-3 mt-4">
+            {['🌲','🌿','🌱','🌲','🦋','🌲','🌿','🐛','🌱','🌲'].map((e, i) => (
+              <span key={i} style={{ fontSize: '18px', opacity: 0.6 }}>{e}</span>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── VICTORY SCREEN ─────────────────────────────────────────
+  if (gamePhase === 'finished') {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4 select-none" style={{ backgroundColor: '#9bbc0f', fontFamily: "'Press Start 2P', monospace" }}>
+        <Confetti width={window.innerWidth} height={window.innerHeight} recycle={true} numberOfPieces={150} />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center gap-6 text-center"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            style={{ fontSize: '64px' }}
+          >
+            🎂
+          </motion.div>
+          <h1 style={{ color: '#0f380f', fontSize: '18px', lineHeight: '2.2' }}>
+            CONGRATULATIONS!<br/>ADVENTURE COMPLETE!
+          </h1>
+          <div className="poke-dialog" style={{ maxWidth: '480px' }}>
+            <p style={{ color: '#0f380f', fontSize: '10px', lineHeight: '2.4' }}>
+              You navigated the winding maze, solved all 5 multi-SLAM challenges,
+              and collected both hidden treasures!
+            </p>
+            <div className="mt-4 flex justify-center gap-2" style={{ fontSize: '28px' }}>
+              <motion.span animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}>🎈</motion.span>
+              <motion.span animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}>🎉</motion.span>
+              <motion.span animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}>🥳</motion.span>
+              <motion.span animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.6 }}>🎊</motion.span>
+              <motion.span animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.8 }}>🎁</motion.span>
+            </div>
+            <p className="mt-4" style={{ color: '#306230', fontSize: '12px', lineHeight: '2.2' }}>
+              Happy Birthday, Jessi! 🎂
+            </p>
+            <p style={{ color: '#306230', fontSize: '9px', lineHeight: '2' }}>
+              From your favorite multi-agent SLAM research partner.
+            </p>
+          </div>
+          <button
+            onClick={resetGame}
+            className="text-xs cursor-pointer py-3 px-8 rounded mt-4 transition-colors"
+            style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#0f380f'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#306230'; }}
+          >
+            ▶ Play Again
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── GAME SCREEN ────────────────────────────────────────────
+  return gameScreen;
 }
