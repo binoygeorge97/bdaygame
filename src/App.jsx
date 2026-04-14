@@ -11,31 +11,31 @@ const MAZE_HEIGHT = 25;
 //   → wind mid → N2/D2(row 11) → wind → N3/D3(row 15-16)
 //   → wind bottom → N4/D4(row 19) → wind → N5/D5(row 21) → Brain(1,23)
 const INITIAL_MAP = [
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','S','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','0','0','0','0','0','0','1','0','1','1','1','1','1','1','1','C','1','1','1','1','1','1','1','1'],
-  ['1','0','1','1','1','1','0','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1'],
-  ['1','0','1','1','1','1','0','0','0','0','0','N1','D1','0','0','0','0','1','1','1','1','1','1','1','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1'],
-  ['1','1','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1'],
-  ['1','1','1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','1','1','0','0','0','0','0','0','0','N2','D2','0','0','0','0','0','0','0','0','0','1','1','1','1'],
-  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1'],
-  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','0','0','0','0','0','0','0','1','1','1','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1','1','1','1','1','0','1','1','1','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','N3','1','1','1','1','1','0','1','1','1','1'],
-  ['1','1','1','1','1','1','1','1','0','1','1','1','1','1','D3','1','1','1','1','1','1','1','1','1','1'],
-  ['1','1','1','1','1','0','0','0','0','0','0','0','0','0','0','1','1','1','1','1','1','1','1','1','1'],
-  ['1','1','1','1','1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1'],
-  ['1','1','1','1','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','N4','D4','0','0','0','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
-  ['1','1','1','0','0','0','0','0','0','D5','N5','0','0','0','0','0','0','0','0','0','0','0','0','0','1'],
-  ['1','1','1','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
-  ['1','B','0','0','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','0','1'],
-  ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', 'S', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '0', '0', '0', '0', '0', '0', '1', '0', '1', '1', '1', '1', '1', '1', '1', 'C', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '0', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '0', '1', '1', '1', '1', '0', '0', '0', '0', '0', 'N1', 'D1', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '0', '0', '0', '0', '0', '0', '0', 'N2', 'D2', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1'],
+  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'],
+  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', 'N3', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', 'D3', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['1', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'N4', 'D4', '0', '0', '0', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1'],
+  ['1', '1', '1', '0', '0', '0', '0', '0', '0', 'D5', 'N5', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+  ['1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1'],
+  ['1', 'B', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
 ];
 
 // Mixed flora for wall tiles — varied forest texture
@@ -100,7 +100,7 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    encImgUrl: "U2FsdGVkX1+BghWTuZQb+/WDfqQiO8rcj6rPe3C/IYeyud+aDLNt9CK86IYLmLqyVuRdPG8jsbgO5Qi+MVMG+aBOqm4YBnzjcl7dwEBR3kp7WqRHiVQtSq6/QWsQiRCy"
+    encImgUrl: "PdD9vA8HarGhXd+FmJuZpIqVMRkFxjiqkAWLCY/3Pdo="
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
@@ -239,7 +239,7 @@ export default function App() {
         const cell = INITIAL_MAP[y][x];
 
         if (cell === '1') return; // Wall
-        
+
         // Handle doors
         if (['D1', 'D2', 'D3', 'D4', 'D5'].includes(cell)) {
           if (!doorsState[cell]) {
@@ -286,7 +286,7 @@ export default function App() {
       alert("Incorrect! Re-calibrate your sensors and try again.");
       setActiveModal(null);
       // Push back one step
-      setPos((prev) => ({ ...prev, x: pos.x, y: pos.y })); 
+      setPos((prev) => ({ ...prev, x: pos.x, y: pos.y }));
     }
   };
 
@@ -296,10 +296,10 @@ export default function App() {
   const gameScreen = (
     <div className="flex items-center justify-center min-h-screen p-4 select-none" style={{ backgroundColor: '#9bbc0f', fontFamily: "'Press Start 2P', monospace" }}>
       {isLootActive && <Confetti width={window.innerWidth} height={window.innerHeight} />}
-      
+
       <div className="flex flex-col items-center">
         <h1 className="mb-4 text-center leading-relaxed" style={{ color: '#0f380f', fontSize: '14px' }}>
-          JESSI's POKEMON<br/>SLAM ADVENTURE
+          JESSI's POKEMON<br />SLAM ADVENTURE
         </h1>
 
         <div className="relative rounded-lg p-1" style={{ backgroundColor: '#0f380f', border: '4px solid #0f380f', boxShadow: '0 4px 0 #306230' }}>
@@ -309,10 +309,10 @@ export default function App() {
                 const isDiscovered = discovered.has(`${x},${y}`);
                 const isRobotHere = pos.x === x && pos.y === y;
                 const animal = animalPositions.find(a => a.x === x && a.y === y);
-                
+
                 let renderContent = '';
                 let bgColor = '#8bac0f'; // path green
-                
+
                 if (!isDiscovered) {
                   bgColor = '#0f380f'; // fog = darkest
                   renderContent = '';
@@ -352,7 +352,7 @@ export default function App() {
         </div>
 
         <p className="mt-3 text-center leading-relaxed" style={{ color: '#306230', fontSize: '8px' }}>
-           Use Arrow Keys or WASD. Find 💻 to unlock barriers 🛑.
+          Use Arrow Keys or WASD. Find 💻 to unlock barriers 🛑.
         </p>
       </div>
 
@@ -378,8 +378,8 @@ export default function App() {
                     key={idx}
                     onClick={() => handleAnswer(activeModal.nodeId, idx)}
                     className="text-left px-4 py-3 text-xs leading-relaxed transition-colors cursor-pointer"
-                    style={{ 
-                      backgroundColor: '#8bac0f', 
+                    style={{
+                      backgroundColor: '#8bac0f',
                       border: '2px solid #0f380f',
                       color: '#0f380f',
                       borderRadius: '4px'
@@ -410,7 +410,7 @@ export default function App() {
               <p className="text-xs mb-6 leading-loose" style={{ color: '#306230' }}>
                 {LOOTS[activeModal.lootId].message}
               </p>
-              
+
               {activeModal.claimed ? (
                 <div className="mb-6">
                   {LOOTS[activeModal.lootId].type === 'claude' ? (() => {
@@ -419,7 +419,7 @@ export default function App() {
                       <div>
                         <div className="p-4 rounded flex flex-col gap-3 mb-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
                           <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realUrl}</span>
-                          <button 
+                          <button
                             onClick={() => navigator.clipboard.writeText(realUrl)}
                             className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
                             style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
@@ -442,8 +442,8 @@ export default function App() {
                     return (
                       <div className="p-4 rounded flex flex-col items-center gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
                         <img src={realImgUrl} alt="Starbucks Gift Card" className="rounded max-w-full" style={{ border: '2px solid #0f380f' }} />
-                        <a 
-                          href={realImgUrl} 
+                        <a
+                          href={realImgUrl}
                           download="Starbucks_Gift_Card.png"
                           className="py-2 px-6 rounded text-xs inline-block w-full text-center cursor-pointer"
                           style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
@@ -500,7 +500,7 @@ export default function App() {
         >
           <div className="text-center">
             <p style={{ color: '#306230', fontSize: '12px' }} className="mb-2">🔒 SYSTEM LOCKED 🔒</p>
-            <h1 style={{ color: '#9bbc0f', fontSize: '16px', lineHeight: '2' }}>JESSI's POKEMON<br/>SLAM ADVENTURE</h1>
+            <h1 style={{ color: '#9bbc0f', fontSize: '16px', lineHeight: '2' }}>JESSI's POKEMON<br />SLAM ADVENTURE</h1>
             <p style={{ color: '#8bac0f', fontSize: '9px', lineHeight: '2' }} className="mt-4">Enter the access code to begin your quest.</p>
           </div>
           <form onSubmit={handlePasswordSubmit} className="flex flex-col items-center gap-4">
@@ -540,7 +540,7 @@ export default function App() {
             </button>
           </form>
           <div className="flex gap-3 mt-4">
-            {['🌲','🌿','🌱','🌲','🦋','🌲','🌿','🐛','🌱','🌲'].map((e, i) => (
+            {['🌲', '🌿', '🌱', '🌲', '🦋', '🌲', '🌿', '🐛', '🌱', '🌲'].map((e, i) => (
               <span key={i} style={{ fontSize: '18px', opacity: 0.6 }}>{e}</span>
             ))}
           </div>
@@ -568,7 +568,7 @@ export default function App() {
             🎂
           </motion.div>
           <h1 style={{ color: '#0f380f', fontSize: '18px', lineHeight: '2.2' }}>
-            CONGRATULATIONS!<br/>ADVENTURE COMPLETE!
+            CONGRATULATIONS!<br />ADVENTURE COMPLETE!
           </h1>
           <div className="poke-dialog" style={{ maxWidth: '480px' }}>
             <p style={{ color: '#0f380f', fontSize: '10px', lineHeight: '2.4' }}>
