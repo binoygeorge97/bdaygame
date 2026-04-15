@@ -100,7 +100,8 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    encUrl: "PdD9vA8HarGhXd+FmJuZpIqVMRkFxjiqkAWLCY/3Pdo="
+    encCard: "PASTE_ENCRYPTED_CARD_NUMBER_HERE",
+    encPin: "PASTE_ENCRYPTED_PIN_HERE"
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
@@ -438,20 +439,39 @@ export default function App() {
                       </div>
                     );
                   })() : (() => {
-                    const realUrl = decryptUrl(LOOTS[activeModal.lootId].encUrl);
+                    const realCard = decryptUrl(LOOTS[activeModal.lootId].encCard);
+                    const realPin = decryptUrl(LOOTS[activeModal.lootId].encPin);
                     return (
-                      <div className="p-4 rounded flex flex-col gap-3" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
-                        <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realUrl}</span>
-                        <button
-                          onClick={() => navigator.clipboard.writeText(realUrl)}
-                          className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
-                          style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
-                        >
-                          ▶ Copy URL
-                        </button>
+                      <div className="p-4 rounded flex flex-col gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
+                        <div>
+                          <p className="text-xs mb-2" style={{ color: '#0f380f' }}>CARD:</p>
+                          <div className="flex items-center gap-2">
+                            <span className="break-all select-all block py-2 px-3 rounded text-xs flex-1" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realCard}</span>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(realCard)}
+                              className="py-2 px-3 rounded text-xs cursor-pointer transition-colors whitespace-nowrap"
+                              style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
+                            >
+                              [ Copy ]
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs mb-2" style={{ color: '#0f380f' }}>PIN:</p>
+                          <div className="flex items-center gap-2">
+                            <span className="break-all select-all block py-2 px-3 rounded text-xs flex-1" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realPin}</span>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(realPin)}
+                              className="py-2 px-3 rounded text-xs cursor-pointer transition-colors whitespace-nowrap"
+                              style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
+                            >
+                              [ Copy ]
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
-                  })()}
+                  })()}}
                 </div>
               ) : (
                 <button
