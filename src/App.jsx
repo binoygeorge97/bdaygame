@@ -100,7 +100,7 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    encImgUrl: "PdD9vA8HarGhXd+FmJuZpIqVMRkFxjiqkAWLCY/3Pdo="
+    encUrl: "PdD9vA8HarGhXd+FmJuZpIqVMRkFxjiqkAWLCY/3Pdo="
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
@@ -438,18 +438,17 @@ export default function App() {
                       </div>
                     );
                   })() : (() => {
-                    const realImgUrl = decryptUrl(LOOTS[activeModal.lootId].encImgUrl);
+                    const realUrl = decryptUrl(LOOTS[activeModal.lootId].encUrl);
                     return (
-                      <div className="p-4 rounded flex flex-col items-center gap-4" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
-                        <img src={realImgUrl} alt="Starbucks Gift Card" className="rounded max-w-full" style={{ border: '2px solid #0f380f' }} />
-                        <a
-                          href={realImgUrl}
-                          download="Starbucks_Gift_Card.png"
-                          className="py-2 px-6 rounded text-xs inline-block w-full text-center cursor-pointer"
+                      <div className="p-4 rounded flex flex-col gap-3" style={{ backgroundColor: '#8bac0f', border: '2px solid #0f380f' }}>
+                        <span className="break-all select-all block py-2 px-3 rounded text-xs" style={{ backgroundColor: '#9bbc0f', color: '#0f380f' }}>{realUrl}</span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(realUrl)}
+                          className="py-2 px-4 rounded text-xs cursor-pointer transition-colors"
                           style={{ backgroundColor: '#306230', color: '#9bbc0f', border: '2px solid #0f380f' }}
                         >
-                          ▶ Download Card
-                        </a>
+                          ▶ Copy URL
+                        </button>
                       </div>
                     );
                   })()}
