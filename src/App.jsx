@@ -100,8 +100,8 @@ const LOOTS = {
     title: "Energy Reserves Depleted! 🎈\nHappy Birthday, Jessi! 🎈",
     message: "The birthday girl has discovered a Caffeinated Fuel Cell. Here is your Starbucks Gift Card:",
     type: "starbucks",
-    encCard: "PASTE_ENCRYPTED_CARD_NUMBER_HERE",
-    encPin: "PASTE_ENCRYPTED_PIN_HERE"
+    encCard: "4LTE5gb4p50GuTB9Nrt9HUoN9Dd2QuuLT8T5gjP7QmE=",
+    encPin: "H4eTksmXWiQizxe4k4xyvA=="
   },
   B: {
     title: "Compute Bottleneck Detected! 🎂\nHappy Birthday, Jessi! 🎂",
